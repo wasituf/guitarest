@@ -20,6 +20,7 @@ import Layout from '../layouts/Layout.astro'
 </Layout>
 
 <script>
+  // @ts-ignore
   import * as ml5 from 'ml5'
   import { guitarStringRanges } from '../constants'
 
@@ -77,7 +78,9 @@ import Layout from '../layouts/Layout.astro'
           offsetUI.innerText = (readings.offset * 5).toFixed(0).toString()
         }
       } else {
-        console.log(err)
+        setInterval(() => {
+          console.log(err)
+        }, 9999999)
       }
       setTimeout(getPitch, 10)
     })
