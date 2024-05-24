@@ -23,7 +23,7 @@ import Layout from '../layouts/Layout.astro'
   import * as ml5 from 'ml5'
   import { guitarStringRanges } from '../constants'
 
-  let pitch: number
+  let pitch: any
   const modelUrl =
     'https://cdn.jsdelivr.net/gh/ml5js/ml5-data-and-models/models/pitch-detection/crepe/'
 
@@ -52,7 +52,7 @@ import Layout from '../layouts/Layout.astro'
   }
 
   function getPitch() {
-    pitch.getPitch(function (err, frequency) {
+    pitch.getPitch(function (err: string, frequency: number) {
       if (frequency) {
         updateSmoothedFrequency(frequency)
 
@@ -61,7 +61,7 @@ import Layout from '../layouts/Layout.astro'
           guitarStringRanges,
         )
 
-        if (readings.name !== 'Unknown') {
+        if (readings.name !== 'Unknown' && offsetUI && indicatorUI && noteUI) {
           noteUI.innerText = readings.name
           if (readings.inTune) {
             noteUI.classList.add('text-green-400')
@@ -76,17 +76,15 @@ import Layout from '../layouts/Layout.astro'
 
           offsetUI.innerText = (readings.offset * 5).toFixed(0).toString()
         }
-
-        console.log(readings)
       } else {
-        console.log('No pitch detected')
+        console.log(err)
       }
       setTimeout(getPitch, 10)
     })
   }
 
   // Function to update smoothed frequency
-  function updateSmoothedFrequency(newFrequency) {
+  function updateSmoothedFrequency(newFrequency: number) {
     // Apply smoothing
     smoothedFrequency =
       smoothedFrequency * smoothingFactor + newFrequency * (1 - smoothingFactor)
