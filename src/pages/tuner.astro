@@ -1,0 +1,115 @@
+---
+import Layout from '../layouts/Layout.astro'
+---
+
+<Layout title="Tuner | Guitarest">
+  <div class="flex h-full w-full items-center justify-center bg-stone-800">
+    <p id="note" class="z-10 text-5xl text-green-400">Play a string to begin</p>
+    <div
+      id="indicator"
+      class="absolute h-20 w-1 -translate-y-16 rounded-full bg-zinc-100"
+    >
+      <div
+        id="offset"
+        class="absolute flex h-8 w-8 translate-x-4 items-center justify-center rounded-lg bg-stone-600 font-semibold text-yellow-400"
+      >
+        -2
+      </div>
+    </div>
+  </div>
+</Layout>
+
+<script>
+  import * as ml5 from 'ml5'
+  import { guitarStringRanges } from '../constants'
+
+  let pitch: number
+  const modelUrl =
+    'https://cdn.jsdelivr.net/gh/ml5js/ml5-data-and-models/models/pitch-detection/crepe/'
+
+  const noteUI = document.getElementById('note')
+  const indicatorUI = document.getElementById('indicator')
+  const offsetUI = document.getElementById('offset')
+
+  async function setup() {
+    startPitch(
+      await navigator.mediaDevices.getUserMedia({ audio: true, video: false }),
+      new AudioContext(),
+    )
+  }
+  setup()
+
+  function startPitch(stream: MediaStream, audioContext: AudioContext) {
+    pitch = ml5.pitchDetection(modelUrl, audioContext, stream, modelLoaded)
+  }
+
+  function modelLoaded() {
+    console.log('Model Loaded')
+    getPitch()
+  }
+
+  function getPitch() {
+    pitch.getPitch(function (err, frequency) {
+      if (frequency) {
+        console.log('frequency: ', frequency)
+
+        const readings = detectStringAndOffset(frequency, guitarStringRanges)
+
+        if (readings.name !== 'Unknown') {
+          noteUI.innerText = readings.name
+          if (readings.inTune) {
+            noteUI.classList.add('text-green-400')
+            noteUI.classList.remove('text-red-400')
+          } else {
+            noteUI.classList.add('text-red-400')
+            noteUI.classList.remove('text-green-400')
+          }
+
+          const offset = (500 / 20) * readings.offset
+          indicatorUI.style.translate = `${offset}px`
+
+          offsetUI.innerText = (readings.offset * 10).toFixed(0).toString()
+        }
+
+        console.log(readings)
+      } else {
+        console.log('No pitch detected')
+      }
+      getPitch()
+    })
+  }
+
+  function detectStringAndOffset(
+    detectedFrequency: number,
+    stringRanges: {
+      name: string
+      min: number
+      max: number
+      perfectMin: number
+      perfectMax: number
+    }[],
+  ) {
+    for (let i = 0; i < stringRanges.length; i++) {
+      const { name, min, max, perfectMin, perfectMax } = stringRanges[i]
+      if (detectedFrequency >= min && detectedFrequency <= max) {
+        let offset = 0
+        let inTune = false
+
+        if (
+          detectedFrequency >= perfectMin &&
+          detectedFrequency <= perfectMax
+        ) {
+          inTune = true
+        } else {
+          offset =
+            detectedFrequency < perfectMin
+              ? detectedFrequency - perfectMin
+              : detectedFrequency - perfectMax
+        }
+
+        return { name, offset, inTune }
+      }
+    }
+    return { name: 'Unknown', offset: 0, inTune: false }
+  }
+</script>
