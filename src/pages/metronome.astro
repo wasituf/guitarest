@@ -1,0 +1,497 @@
+---
+import { Icon } from 'astro-icon/components'
+import { Image } from 'astro:assets'
+
+import Layout from '../layouts/Layout.astro'
+import HelpIndicator from '../components/HelpIndicator.astro'
+
+import mtTicker from '../images/metronome-ticker.svg'
+import mtBox from '../images/metronome-box.svg'
+---
+
+<Layout title="Metronome | Guitarest">
+  <main class="flex h-full w-full flex-col items-center justify-center gap-8">
+    <!-- Help Indicator -->
+    <HelpIndicator
+      message={`Click the <span class="font-bold">Metronome</span> or press <span
+        class="font-bold">Space</span> to start.`}
+    />
+
+    <!-- Metronome UI -->
+    <div class="mb-16 mt-32 flex w-full items-center justify-center">
+      <div id="play-btn" class="group relative">
+        <Image
+          src={mtTicker}
+          alt="Metronome Graphic"
+          width={34}
+          id="metronome-ticker"
+          class="absolute left-0 right-0 top-[-174px] ml-auto mr-auto origin-bottom opacity-90 transition-all duration-300 group-hover:opacity-100"
+        />
+        <Image
+          src={mtBox}
+          alt="Metronome Graphic"
+          class="mx-auto cursor-pointer opacity-80 transition duration-300 group-hover:opacity-100"
+          width={188}
+        />
+        <div
+          id="indicator-light"
+          class="absolute right-4 top-5 h-2 w-2 rounded-full bg-red-500 hue-rotate-[150deg]"
+        >
+        </div>
+        <div
+          class="absolute left-4 top-5 h-2 w-2 rounded-full bg-black/30 hue-rotate-[150deg]"
+        >
+        </div>
+        <div
+          class="absolute left-7 top-5 h-2 w-2 rounded-full bg-black/30 hue-rotate-[150deg]"
+        >
+        </div>
+        <input
+          id="control"
+          type="checkbox"
+          class="absolute bottom-0 z-20 h-[188px] w-[188px] cursor-pointer rounded-full opacity-0"
+        />
+        <Icon
+          id="play-icon"
+          class="absolute left-[3px] right-0 top-[16px] mx-auto ml-auto mr-auto text-center text-black/0 transition duration-300 group-hover:text-black"
+          name="hugeicons:play"
+          size={46}
+        />
+        <Icon
+          id="pause-icon"
+          class="absolute left-0 right-0 top-[20px] mx-auto ml-auto mr-auto text-center text-black/0 opacity-0 transition duration-300 group-hover:text-black"
+          name="hugeicons:pause"
+          size={40}
+        />
+      </div>
+    </div>
+
+    <!-- Timing Selection -->
+    <div
+      class="mb-4 flex items-center justify-center gap-8 md:absolute md:mb-0 md:-translate-y-[110px] md:translate-x-56 md:flex-col"
+    >
+      <div class="group relative">
+        <input
+          type="radio"
+          name="timing"
+          id="fourfour"
+          value="4"
+          class="h-12 w-12 opacity-0"
+          checked
+        />
+        <label
+          for="fourfour"
+          class="absolute left-0 top-0 flex h-12 w-12 cursor-pointer items-center justify-center rounded-full border-2 border-white/80 text-center text-lg font-semibold transition duration-300 group-hover:bg-white/25"
+          >4:4</label
+        >
+      </div>
+      <div class="group relative">
+        <input
+          type="radio"
+          name="timing"
+          id="sixeight"
+          value="3"
+          class="h-12 w-12 opacity-0"
+        />
+        <label
+          for="sixeight"
+          class="absolute left-0 top-0 flex h-12 w-12 cursor-pointer items-center justify-center rounded-full border-2 border-white/80 text-center text-lg font-semibold transition duration-300 group-hover:bg-white/25"
+          >6:8</label
+        >
+      </div>
+      <div class="group relative">
+        <input
+          type="radio"
+          name="timing"
+          id="oneone"
+          value="1"
+          class="h-12 w-12 opacity-0"
+        />
+        <label
+          for="oneone"
+          class="absolute left-0 top-0 flex h-12 w-12 cursor-pointer items-center justify-center rounded-full border-2 border-white/80 text-center text-lg font-semibold transition duration-300 group-hover:bg-white/25"
+          >1:1</label
+        >
+      </div>
+    </div>
+
+    <!-- Volume and BPM sliders -->
+    <div class="mx-auto hidden w-full max-w-[700px] flex-col gap-4 md:flex">
+      <div
+        class="flex w-full flex-wrap items-center justify-between gap-4 md:flex-nowrap"
+      >
+        <button
+          id="volume-down"
+          class="order-2 rounded-full border-2 border-white/80 p-2 transition duration-300 hover:border-white md:order-2"
+        >
+          <Icon name="hugeicons:minus-sign" size={16} />
+        </button>
+
+        <!-- Slider -->
+        <input
+          id="volume"
+          type="range"
+          min="1"
+          max="100"
+          value="100"
+          class="range-slider order-1 w-full max-w-[700px] md:order-3"
+        />
+
+        <p
+          class="order-3 flex items-center justify-center gap-3 md:order-1 md:min-w-[110px] md:justify-start"
+        >
+          <Icon name="hugeicons:volume-low" size={28} />
+          <span>
+            <span id="volume-reading" class="text-xl">100</span><span
+              class="text-sm font-bold">%</span
+            >
+          </span>
+        </p>
+        <button
+          id="volume-up"
+          class="order-4 rounded-full border-2 border-white/80 p-2 transition duration-300 hover:border-white md:order-4"
+        >
+          <Icon name="hugeicons:plus-sign" size={16} />
+        </button>
+      </div>
+    </div>
+    <div class="mx-auto flex w-full max-w-[700px] flex-col gap-4">
+      <div
+        class="flex w-full flex-wrap items-center justify-between gap-4 md:flex-nowrap"
+      >
+        <button
+          id="bpm-down"
+          class="order-2 rounded-full border-2 border-white/80 p-2 transition duration-300 hover:border-white md:order-2"
+        >
+          <Icon name="hugeicons:minus-sign" size={16} />
+        </button>
+
+        <!-- Slider -->
+        <input
+          id="bpm"
+          type="range"
+          min="20"
+          max="220"
+          value="60"
+          class="range-slider order-1 max-w-[700px] md:order-3"
+        />
+
+        <p
+          class="order-3 flex items-center justify-center gap-4 md:order-1 md:min-w-[110px] md:justify-start"
+        >
+          <Icon name="hugeicons:dashboard-speed-02" size={24} />
+          <span>
+            <span id="bpm-reading" class="text-xl">60</span><span
+              class="text-sm font-bold">BPM</span
+            >
+          </span>
+        </p>
+        <button
+          id="bpm-up"
+          class="order-4 rounded-full border-2 border-white/80 p-2 transition duration-300 hover:border-white md:order-4"
+        >
+          <Icon name="hugeicons:plus-sign" size={16} />
+        </button>
+      </div>
+    </div>
+  </main>
+</Layout>
+
+<script>
+  import * as Tone from 'tone'
+
+  let isPlaying = false
+  let bpm = 100
+  let gain: any
+  let synth: any
+  let clock: any
+  let userVolume: number
+  let beatsPerMeasure = 4
+  let beatCount = beatsPerMeasure - 1
+
+  let animationDuration = 60 / bpm / 1
+
+  const playBtnUI = document.getElementById('play-btn')
+  const volumeUI = document.getElementById('volume') as HTMLInputElement
+  const bpmUI = document.getElementById('bpm') as HTMLInputElement
+  const metronomeTickerUI = document.getElementById('metronome-ticker')
+  const sliders = document.querySelectorAll('input[type="range"]')
+  const volumeReadingUI = document.getElementById('volume-reading')
+  const bpmReadingUI = document.getElementById('bpm-reading')
+  const timingsUI = document.querySelectorAll('input[type="radio"]')
+  const timingLabelsUI = document.querySelectorAll('label')
+
+  document.addEventListener('keyup', (e) => {
+    const controlUI = document.getElementById('control') as HTMLInputElement
+    if (e.code === 'Space') {
+      controlUI?.click()
+    }
+  })
+
+  document.addEventListener('DOMContentLoaded', () => {
+    userVolume = +(localStorage.getItem('volume') ?? 1)
+    bpm = +(localStorage.getItem('bpm') ?? 60)
+    timingsUI?.forEach((timing) => {
+      const thisTiming = timing as HTMLInputElement
+      if (thisTiming.checked) {
+        beatsPerMeasure = +thisTiming.value
+      }
+    })
+
+    if (localStorage.getItem('timing')) {
+      const storedTiming = localStorage.getItem('timing')
+      timingsUI?.forEach((timing) => {
+        const thisTiming = timing as HTMLInputElement
+        if (thisTiming.value === storedTiming && thisTiming.labels) {
+          thisTiming.setAttribute('checked', 'true')
+          const label = thisTiming.labels[0]
+          refreshLabels(label)
+        }
+      })
+    }
+
+    if (userVolume && volumeUI && volumeReadingUI) {
+      volumeUI.value = (userVolume * 100).toString()
+      volumeReadingUI.innerText = Math.round(userVolume * 100).toString()
+    }
+
+    if (bpm && bpmUI && bpmReadingUI) {
+      bpmUI.value = bpm.toString()
+      bpmReadingUI.innerText = Math.round(bpm).toString()
+    }
+
+    updateSliders()
+
+    animationDuration = 60 / bpm / 1
+    metronomeTickerUI?.style.setProperty(
+      '--animation-duration',
+      `${animationDuration}s`,
+    )
+  })
+
+  // Up and Down Buttons
+  document.getElementById('volume-up')?.addEventListener('click', () => {
+    iterateVolume('positive')
+  })
+  document.getElementById('volume-down')?.addEventListener('click', () => {
+    iterateVolume('negative')
+  })
+  document.getElementById('bpm-up')?.addEventListener('click', () => {
+    iterateBpm('positive')
+  })
+  document.getElementById('bpm-down')?.addEventListener('click', () => {
+    iterateBpm('negative')
+  })
+
+  // Timings Change
+  timingsUI.forEach((timing) => {
+    timing.addEventListener('click', (e) => {
+      const target = e.target as HTMLInputElement
+      if (target.checked && target.labels) {
+        beatsPerMeasure = +target.value
+        refreshLabels(target.labels[0])
+      } else {
+        timingsUI?.forEach((timing) => {
+          const thisTiming = timing as HTMLInputElement
+          if (thisTiming.checked) {
+            beatsPerMeasure = +thisTiming.value
+          }
+        })
+      }
+
+      localStorage.setItem('timing', beatsPerMeasure.toString())
+    })
+  })
+
+  playBtnUI?.addEventListener('click', async () => {
+    const controlUI = document.getElementById('control') as HTMLInputElement
+    const playIconUI = document.getElementById('play-icon')
+    const pauseIconUI = document.getElementById('pause-icon')
+    const indicatorUI = document.getElementById('indicator-light')
+
+    await Tone.start()
+
+    playIconUI?.classList.toggle('opacity-0')
+    pauseIconUI?.classList.toggle('opacity-0')
+    indicatorUI?.classList.toggle('hue-rotate-[150deg]')
+
+    if (controlUI?.checked) {
+      startMetronome()
+    } else {
+      stopMetronome()
+    }
+  })
+
+  volumeUI?.addEventListener('change', (e) => {
+    const target = e.target as HTMLInputElement
+    const volume: number = +target.value
+    userVolume = volume / 100
+
+    updateSliders()
+    if (volumeReadingUI) {
+      volumeReadingUI.innerText = Math.round(userVolume * 100).toString()
+    }
+
+    localStorage.setItem('volume', userVolume.toString())
+    gain?.gain.rampTo(volume / 100, 0.5)
+  })
+
+  bpmUI?.addEventListener('change', (e) => {
+    const target = e.target as HTMLInputElement
+    bpm = +target.value
+
+    if (isPlaying) {
+      const newInterval = 60 / bpm
+      const newFrequency = 1 / newInterval
+      clock.frequency.value = newFrequency
+    }
+
+    animationDuration = 60 / bpm / 1
+    metronomeTickerUI?.style.setProperty(
+      '--animation-duration',
+      `${animationDuration}s`,
+    )
+
+    updateSliders()
+    if (bpmReadingUI) {
+      bpmReadingUI.innerText = Math.round(bpm).toString()
+    }
+
+    localStorage.setItem('bpm', bpm.toString())
+  })
+
+  function startMetronome() {
+    if (!isPlaying) {
+      beatCount = beatsPerMeasure - 1
+
+      const interval = 60 / bpm // Interval in seconds
+      const frequency = 1 / interval // Frequency in Hertz
+
+      gain = new Tone.Gain(userVolume).toDestination()
+      synth = new Tone.Synth().connect(gain)
+
+      clock = new Tone.Clock((time) => {
+        let note
+        if (beatsPerMeasure === 1) {
+          note = 'C5'
+        } else {
+          note = getNote(beatCount, beatsPerMeasure)
+        }
+        synth.triggerAttackRelease(note, '8n', time)
+        beatCount = (beatCount + 1) % beatsPerMeasure
+      }, frequency)
+
+      clock.start()
+      Tone.start()
+
+      isPlaying = true
+
+      if (metronomeTickerUI) {
+        animationDuration = 60 / bpm / 1
+
+        metronomeTickerUI.style.setProperty(
+          '--animation-duration',
+          `${animationDuration}s`,
+        )
+        metronomeTickerUI.style.removeProperty('--animation-delay')
+        metronomeTickerUI.style.animationPlayState = 'running'
+      }
+    }
+  }
+
+  function stopMetronome() {
+    if (isPlaying) {
+      clock.stop()
+
+      if (metronomeTickerUI) {
+        animationDuration = 60 / bpm / 1
+        metronomeTickerUI.style.animationPlayState = 'paused'
+        metronomeTickerUI.style.setProperty(
+          '--animation-delay',
+          `${-animationDuration}s`,
+        )
+        metronomeTickerUI.style.transform = 'rotate(0deg)'
+      }
+
+      isPlaying = false
+    }
+  }
+
+  function getNote(beatCount: number, beatsPerMeasure: number) {
+    const baseNote = 'C5'
+    const accentNote = 'G5'
+    return beatCount === beatsPerMeasure - 1 ? accentNote : baseNote
+  }
+
+  function updateSliders() {
+    sliders.forEach((slider) => {
+      const rangeSlider = slider as HTMLInputElement
+      const value = parseInt(rangeSlider.value)
+      const minValue = parseInt(rangeSlider.min)
+      const maxValue = parseInt(rangeSlider.max)
+      const percentage = ((value - minValue) / (maxValue - minValue)) * 100
+      let offset: number
+
+      if (percentage < 15) {
+        offset = 24
+      } else if (percentage < 40) {
+        offset = 18
+      } else if (percentage < 60) {
+        offset = 14
+      } else if (percentage < 80) {
+        offset = 8
+      } else {
+        offset = 0
+      }
+
+      rangeSlider.style.setProperty(
+        '--value',
+        `calc(${percentage}% + ${offset}px)`,
+      )
+    })
+  }
+
+  function iterateVolume(trend: string) {
+    if (userVolume && volumeUI && volumeReadingUI) {
+      let volume = userVolume * 100
+      if (trend === 'positive' && +volumeUI.value < 100) {
+        volume = Math.round(userVolume * 100 + 1)
+      } else if (trend === 'negative' && +volumeUI.value > 1) {
+        volume = Math.round(userVolume * 100 - 1)
+      }
+      userVolume = volume / 100
+      updateSliders()
+      volumeUI.value = volume.toString()
+      volumeReadingUI.innerText = volume.toString()
+
+      localStorage.setItem('volume', (volume / 100).toString())
+    }
+  }
+
+  function iterateBpm(trend: string) {
+    if (bpm && bpmUI && bpmReadingUI) {
+      let newBpm = bpm
+      if (trend === 'positive' && +bpmUI.value < 220) {
+        newBpm = Math.round(newBpm + 1)
+      } else if (trend === 'negative' && +bpmUI.value > 20) {
+        newBpm = Math.round(newBpm - 1)
+      }
+      bpm = newBpm
+      updateSliders()
+      bpmUI.value = newBpm.toString()
+      bpmReadingUI.innerText = newBpm.toString()
+
+      localStorage.setItem('bpm', bpm.toString())
+    }
+  }
+
+  function refreshLabels(activeLabel: HTMLElement) {
+    timingLabelsUI.forEach((label) => {
+      label.classList.remove('bg-white/80')
+      label.classList.remove('text-black')
+    })
+
+    activeLabel.classList.add('bg-white/80')
+    activeLabel.classList.add('text-black')
+  }
+</script>

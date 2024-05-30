@@ -3,7 +3,14 @@ import Layout from '../layouts/Layout.astro'
 ---
 
 <Layout title="Guitarest">
-  <main class="flex h-full w-full">
-    <a href="/tuner">Tuner</a>
+  <main class="flex h-full w-full flex-col items-center justify-center">
+    <p class="mb-2 text-4xl text-white">Welcome to Guitarest</p>
+    <p class="text-lg text-zinc-300">
+      Start your journey by <a
+        href="/tuner"
+        class="text-white underline underline-offset-[6px]"
+        >tuning your guitar.</a
+      >
+    </p>
   </main>
 </Layout>

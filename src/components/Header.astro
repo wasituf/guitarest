@@ -1,7 +1,21 @@
 ---
-
+const { pathname } = Astro.url
+console.log(pathname)
 ---
 
-<nav>
-  <a href="/">Home</a>
+<nav
+  class="absolute left-0 top-8 z-10 flex w-screen items-center justify-center gap-6 text-center text-zinc-300"
+>
+  <a class={pathname === '/' ? 'font-bold' : ''} href="/">Home</a>
+  <a class={pathname === '/tuner' ? 'font-bold' : ''} href="/tuner">Tuner</a>
+  <a class={pathname === '/metronome' ? 'font-bold' : ''} href="/metronome"
+    >Metronome</a
+  >
+  <a
+    class={pathname === '/chord-creator' ? 'font-bold' : ''}
+    href="/chord-creator">Chord Creator</a
+  >
+  <a class={pathname === '/strumming' ? 'font-bold' : ''} href="/strumming"
+    >Strumming</a
+  >
 </nav>

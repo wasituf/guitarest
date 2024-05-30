@@ -1,22 +1,22 @@
 ---
 import Layout from '../layouts/Layout.astro'
+
+import HelpIndicator from '../components/HelpIndicator.astro'
 ---
 
 <Layout title="Tuner | Guitarest">
-  <div class="flex h-full w-full items-center justify-center bg-stone-800">
-    <p id="note" class="z-10 text-5xl text-green-400">Play a string to begin</p>
+  <main class="flex h-full w-full items-center justify-center">
+    <HelpIndicator
+      message={`<span class="font-bold">Pick</span> a string on your <span class="font-bold">Guitar</span> to start tuning.`}
+    />
+    <p id="note" class="z-10 -translate-y-3 text-5xl"></p>
+    <p id="offset" class="absolute translate-y-7"></p>
     <div
       id="indicator"
-      class="absolute h-20 w-1 -translate-y-16 rounded-full bg-zinc-100"
+      class="absolute h-[200px] max-h-[600px] min-h-24 w-[200px] min-w-24 max-w-[600px] rounded-full border-4 border-green-500 transition-size duration-300"
     >
-      <div
-        id="offset"
-        class="absolute flex h-8 w-8 translate-x-4 items-center justify-center rounded-lg bg-stone-600 font-semibold text-yellow-400"
-      >
-        -2
-      </div>
     </div>
-  </div>
+  </main>
 </Layout>
 
 <script>
@@ -25,8 +25,8 @@ import Layout from '../layouts/Layout.astro'
   import { guitarStringRanges } from '../constants'
 
   let pitch: any
-  const modelUrl =
-    'https://cdn.jsdelivr.net/gh/ml5js/ml5-data-and-models/models/pitch-detection/crepe/'
+
+  const tone = new Audio('/audio/ding.wav')
 
   const noteUI = document.getElementById('note')
   const indicatorUI = document.getElementById('indicator')
@@ -44,7 +44,7 @@ import Layout from '../layouts/Layout.astro'
   setup()
 
   function startPitch(stream: MediaStream, audioContext: AudioContext) {
-    pitch = ml5.pitchDetection(modelUrl, audioContext, stream, modelLoaded)
+    pitch = ml5.pitchDetection('/model', audioContext, stream, modelLoaded)
   }
 
   function modelLoaded() {
@@ -54,7 +54,11 @@ import Layout from '../layouts/Layout.astro'
 
   function getPitch() {
     pitch.getPitch(function (err: string, frequency: number) {
+      let delay = 10
+
       if (frequency) {
+        delay = 10
+
         updateSmoothedFrequency(frequency)
 
         const readings = detectStringAndOffset(
@@ -64,25 +68,38 @@ import Layout from '../layouts/Layout.astro'
 
         if (readings.name !== 'Unknown' && offsetUI && indicatorUI && noteUI) {
           noteUI.innerText = readings.name
-          if (readings.inTune) {
-            noteUI.classList.add('text-green-400')
-            noteUI.classList.remove('text-red-400')
-          } else {
-            noteUI.classList.add('text-red-400')
-            noteUI.classList.remove('text-green-400')
-          }
 
-          const offset = (500 / 20) * readings.offset
-          indicatorUI.style.translate = `${offset}px`
+          const offset = Math.abs((400 / 20) * readings.offset)
+          indicatorUI.style.width = `${200 + offset}px`
+          indicatorUI.style.height = `${200 + offset}px`
 
           offsetUI.innerText = (readings.offset * 5).toFixed(0).toString()
+          if (readings.offset < 0) {
+            offsetUI.style.color = '#FF4B4B'
+            offsetUI.innerText = 'Too Low'
+          } else if (readings.offset > 0) {
+            offsetUI.style.color = '#FF4B4B'
+            offsetUI.innerText = 'Too High'
+          } else {
+            offsetUI.style.color = '#00FF00'
+            offsetUI.innerText = 'In Tune'
+          }
+
+          if (readings.inTune) {
+            tone.play()
+            indicatorUI.classList.remove('border-red-500')
+            indicatorUI.classList.add('border-green-500')
+            delay = 1000
+          } else {
+            indicatorUI.classList.remove('border-green-500')
+            indicatorUI.classList.add('border-red-500')
+          }
         }
       } else {
-        setInterval(() => {
-          console.log(err)
-        }, 9999999)
+        if (err) {
+        }
       }
-      setTimeout(getPitch, 10)
+      setTimeout(getPitch, delay)
     })
   }
 
