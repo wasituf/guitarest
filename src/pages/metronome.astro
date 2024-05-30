@@ -115,6 +115,8 @@ import mtBox from '../images/metronome-box.svg'
       </div>
     </div>
 
+    <!-- TODO: Tone Selection -->
+
     <!-- Volume and BPM sliders -->
     <div class="mx-auto hidden w-full max-w-[700px] flex-col gap-4 md:flex">
       <div
@@ -229,8 +231,16 @@ import mtBox from '../images/metronome-box.svg'
   })
 
   document.addEventListener('DOMContentLoaded', () => {
-    userVolume = +(localStorage.getItem('volume') ?? 1)
-    bpm = +(localStorage.getItem('bpm') ?? 60)
+    userVolume = +(localStorage.getItem('volume') ?? 0.8)
+    bpm = +(localStorage.getItem('bpm') ?? 80)
+
+    const fourFour = document.getElementById('fourfour') as HTMLInputElement
+    if (fourFour && fourFour.labels) {
+      const label = fourFour.labels[0]
+      fourFour.checked = true
+      refreshLabels(label)
+    }
+
     timingsUI?.forEach((timing) => {
       const thisTiming = timing as HTMLInputElement
       if (thisTiming.checked) {
