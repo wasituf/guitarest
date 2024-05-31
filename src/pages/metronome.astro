@@ -281,16 +281,16 @@ import mtBox from '../images/metronome-box.svg'
 
   // Up and Down Buttons
   document.getElementById('volume-up')?.addEventListener('click', () => {
-    iterateVolume('positive')
+    iterateVolume(1)
   })
   document.getElementById('volume-down')?.addEventListener('click', () => {
-    iterateVolume('negative')
+    iterateVolume(-1)
   })
   document.getElementById('bpm-up')?.addEventListener('click', () => {
-    iterateBpm('positive')
+    iterateBpm(1)
   })
   document.getElementById('bpm-down')?.addEventListener('click', () => {
-    iterateBpm('negative')
+    iterateBpm(-1)
   })
 
   // Timings Change
@@ -335,39 +335,15 @@ import mtBox from '../images/metronome-box.svg'
   volumeUI?.addEventListener('change', (e) => {
     const target = e.target as HTMLInputElement
     const volume: number = +target.value
-    userVolume = volume / 100
 
-    updateSliders()
-    if (volumeReadingUI) {
-      volumeReadingUI.innerText = Math.round(userVolume * 100).toString()
-    }
-
-    localStorage.setItem('volume', userVolume.toString())
-    gain?.gain.rampTo(volume / 100, 0.5)
+    updateVolume(volume)
   })
 
   bpmUI?.addEventListener('change', (e) => {
     const target = e.target as HTMLInputElement
     bpm = +target.value
 
-    if (isPlaying) {
-      const newInterval = 60 / bpm
-      const newFrequency = 1 / newInterval
-      clock.frequency.value = newFrequency
-    }
-
-    animationDuration = 60 / bpm / 1
-    metronomeTickerUI?.style.setProperty(
-      '--animation-duration',
-      `${animationDuration}s`,
-    )
-
-    updateSliders()
-    if (bpmReadingUI) {
-      bpmReadingUI.innerText = Math.round(bpm).toString()
-    }
-
-    localStorage.setItem('bpm', bpm.toString())
+    updateBpm(bpm)
   })
 
   function startMetronome() {
@@ -433,6 +409,72 @@ import mtBox from '../images/metronome-box.svg'
     return beatCount === beatsPerMeasure - 1 ? accentNote : baseNote
   }
 
+  function updateVolume(volume: number) {
+    userVolume = volume / 100
+    if (volumeReadingUI) {
+      volumeReadingUI.innerText = Math.round(userVolume * 100).toString()
+    }
+
+    updateSliders()
+    gain?.gain.rampTo(volume / 100, 0.5)
+
+    localStorage.setItem('volume', userVolume.toString())
+  }
+
+  function updateBpm(bpm: number) {
+    if (isPlaying) {
+      const newInterval = 60 / bpm
+      const newFrequency = 1 / newInterval
+      clock.frequency.value = newFrequency
+    }
+
+    animationDuration = 60 / bpm / 1
+    metronomeTickerUI?.style.setProperty(
+      '--animation-duration',
+      `${animationDuration}s`,
+    )
+
+    updateSliders()
+    if (bpmReadingUI) {
+      bpmReadingUI.innerText = Math.round(bpm).toString()
+    }
+
+    localStorage.setItem('bpm', bpm.toString())
+  }
+
+  function iterateVolume(amount: number) {
+    if (userVolume && volumeUI && volumeReadingUI) {
+      let volume = 0
+      if (amount > 0 && +volumeUI.value < 100) {
+        volume = Math.round(userVolume * 100 + amount)
+      } else if (amount < 0 && +volumeUI.value > 1) {
+        volume = Math.round(userVolume * 100 + amount)
+      } else {
+        return
+      }
+
+      updateVolume(volume)
+      volumeUI.value = volume.toString()
+    }
+  }
+
+  function iterateBpm(amount: number) {
+    if (bpm && bpmUI && bpmReadingUI) {
+      let newBpm = bpm
+      if (amount > 0 && +bpmUI.value < 220) {
+        newBpm = Math.round(newBpm + amount)
+      } else if (amount < 0 && +bpmUI.value > 20) {
+        newBpm = Math.round(newBpm + amount)
+      } else {
+        return
+      }
+
+      bpm = newBpm
+      updateBpm(newBpm)
+      bpmUI.value = newBpm.toString()
+    }
+  }
+
   function updateSliders() {
     sliders.forEach((slider) => {
       const rangeSlider = slider as HTMLInputElement
@@ -459,40 +501,6 @@ import mtBox from '../images/metronome-box.svg'
         `calc(${percentage}% + ${offset}px)`,
       )
     })
-  }
-
-  function iterateVolume(trend: string) {
-    if (userVolume && volumeUI && volumeReadingUI) {
-      let volume = userVolume * 100
-      if (trend === 'positive' && +volumeUI.value < 100) {
-        volume = Math.round(userVolume * 100 + 1)
-      } else if (trend === 'negative' && +volumeUI.value > 1) {
-        volume = Math.round(userVolume * 100 - 1)
-      }
-      userVolume = volume / 100
-      updateSliders()
-      volumeUI.value = volume.toString()
-      volumeReadingUI.innerText = volume.toString()
-
-      localStorage.setItem('volume', (volume / 100).toString())
-    }
-  }
-
-  function iterateBpm(trend: string) {
-    if (bpm && bpmUI && bpmReadingUI) {
-      let newBpm = bpm
-      if (trend === 'positive' && +bpmUI.value < 220) {
-        newBpm = Math.round(newBpm + 1)
-      } else if (trend === 'negative' && +bpmUI.value > 20) {
-        newBpm = Math.round(newBpm - 1)
-      }
-      bpm = newBpm
-      updateSliders()
-      bpmUI.value = newBpm.toString()
-      bpmReadingUI.innerText = newBpm.toString()
-
-      localStorage.setItem('bpm', bpm.toString())
-    }
   }
 
   function refreshLabels(activeLabel: HTMLElement) {
