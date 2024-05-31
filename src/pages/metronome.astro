@@ -202,6 +202,7 @@ import mtBox from '../images/metronome-box.svg'
 <script>
   import * as Tone from 'tone'
 
+  // Variables
   let isPlaying = false
   let bpm = 100
   let gain: any
@@ -210,68 +211,53 @@ import mtBox from '../images/metronome-box.svg'
   let userVolume: number
   let beatsPerMeasure = 4
   let beatCount = beatsPerMeasure - 1
-
   let animationDuration = 60 / bpm / 1
 
+  // UI Elements
   const playBtnUI = document.getElementById('play-btn')
   const volumeUI = document.getElementById('volume') as HTMLInputElement
   const bpmUI = document.getElementById('bpm') as HTMLInputElement
   const metronomeTickerUI = document.getElementById('metronome-ticker')
-  const sliders = document.querySelectorAll('input[type="range"]')
+  const slidersUI = document.querySelectorAll('input[type="range"]')
   const volumeReadingUI = document.getElementById('volume-reading')
   const bpmReadingUI = document.getElementById('bpm-reading')
   const timingsUI = document.querySelectorAll('input[type="radio"]')
   const timingLabelsUI = document.querySelectorAll('label')
 
-  document.addEventListener('keyup', (e) => {
-    const controlUI = document.getElementById('control') as HTMLInputElement
-    if (e.code === 'Space') {
-      controlUI?.click()
-    }
-  })
+  // Event Listeners
 
+  // Initialize values
   document.addEventListener('DOMContentLoaded', () => {
-    userVolume = +(localStorage.getItem('volume') ?? 0.8)
-    bpm = +(localStorage.getItem('bpm') ?? 80)
-
-    const fourFour = document.getElementById('fourfour') as HTMLInputElement
-    if (fourFour && fourFour.labels) {
-      const label = fourFour.labels[0]
-      fourFour.checked = true
-      refreshLabels(label)
-    }
+    // Check timing
+    const storedTiming = localStorage.getItem('timing') ?? '4'
+    beatsPerMeasure = +storedTiming
 
     timingsUI?.forEach((timing) => {
       const thisTiming = timing as HTMLInputElement
-      if (thisTiming.checked) {
-        beatsPerMeasure = +thisTiming.value
+      if (thisTiming.value === storedTiming && thisTiming.labels) {
+        thisTiming.setAttribute('checked', 'true')
+        const label = thisTiming.labels[0]
+        refreshLabels(label)
       }
     })
 
-    if (localStorage.getItem('timing')) {
-      const storedTiming = localStorage.getItem('timing')
-      timingsUI?.forEach((timing) => {
-        const thisTiming = timing as HTMLInputElement
-        if (thisTiming.value === storedTiming && thisTiming.labels) {
-          thisTiming.setAttribute('checked', 'true')
-          const label = thisTiming.labels[0]
-          refreshLabels(label)
-        }
-      })
+    // Check volume
+    if (volumeUI) {
+      // WARN: The order of these are important
+      const newVolume = +(localStorage.getItem('volume') ?? 0.8)
+      volumeUI.value = Math.round(newVolume * 100).toString()
+      updateVolume(newVolume)
     }
 
-    if (userVolume && volumeUI && volumeReadingUI) {
-      volumeUI.value = (userVolume * 100).toString()
-      volumeReadingUI.innerText = Math.round(userVolume * 100).toString()
+    // Check bpm
+    if (bpmUI) {
+      // WARN: The order of these are important
+      const newBpm = +(localStorage.getItem('bpm') ?? 80)
+      bpmUI.value = Math.round(newBpm).toString()
+      updateBpm(newBpm)
     }
 
-    if (bpm && bpmUI && bpmReadingUI) {
-      bpmUI.value = bpm.toString()
-      bpmReadingUI.innerText = Math.round(bpm).toString()
-    }
-
-    updateSliders()
-
+    // Reset animation
     animationDuration = 60 / bpm / 1
     metronomeTickerUI?.style.setProperty(
       '--animation-duration',
@@ -280,20 +266,7 @@ import mtBox from '../images/metronome-box.svg'
   })
 
   // Up and Down Buttons
-  document.getElementById('volume-up')?.addEventListener('click', () => {
-    iterateVolume(1)
-  })
-  document.getElementById('volume-down')?.addEventListener('click', () => {
-    iterateVolume(-1)
-  })
-  document.getElementById('bpm-up')?.addEventListener('click', () => {
-    iterateBpm(1)
-  })
-  document.getElementById('bpm-down')?.addEventListener('click', () => {
-    iterateBpm(-1)
-  })
-
-  // Timings Change
+  // Timings
   timingsUI.forEach((timing) => {
     timing.addEventListener('click', (e) => {
       const target = e.target as HTMLInputElement
@@ -313,6 +286,7 @@ import mtBox from '../images/metronome-box.svg'
     })
   })
 
+  // Play Control
   playBtnUI?.addEventListener('click', async () => {
     const controlUI = document.getElementById('control') as HTMLInputElement
     const playIconUI = document.getElementById('play-icon')
@@ -332,13 +306,29 @@ import mtBox from '../images/metronome-box.svg'
     }
   })
 
+  document.addEventListener('keyup', (e) => {
+    const controlUI = document.getElementById('control') as HTMLInputElement
+    if (e.code === 'Space') {
+      controlUI?.click()
+    }
+  })
+
+  // Volume Controls
   volumeUI?.addEventListener('change', (e) => {
     const target = e.target as HTMLInputElement
     const volume: number = +target.value
 
-    updateVolume(volume)
+    updateVolume(volume / 100)
   })
 
+  document.getElementById('volume-up')?.addEventListener('click', () => {
+    iterateVolume(1)
+  })
+  document.getElementById('volume-down')?.addEventListener('click', () => {
+    iterateVolume(-1)
+  })
+
+  // BPM Controls
   bpmUI?.addEventListener('change', (e) => {
     const target = e.target as HTMLInputElement
     bpm = +target.value
@@ -346,6 +336,16 @@ import mtBox from '../images/metronome-box.svg'
     updateBpm(bpm)
   })
 
+  document.getElementById('bpm-up')?.addEventListener('click', () => {
+    iterateBpm(1)
+  })
+  document.getElementById('bpm-down')?.addEventListener('click', () => {
+    iterateBpm(-1)
+  })
+
+  // Functions
+
+  // Start
   function startMetronome() {
     if (!isPlaying) {
       beatCount = beatsPerMeasure - 1
@@ -385,6 +385,7 @@ import mtBox from '../images/metronome-box.svg'
     }
   }
 
+  // Stop
   function stopMetronome() {
     if (isPlaying) {
       clock.stop()
@@ -403,24 +404,27 @@ import mtBox from '../images/metronome-box.svg'
     }
   }
 
+  // Get Note
   function getNote(beatCount: number, beatsPerMeasure: number) {
     const baseNote = 'C5'
     const accentNote = 'G5'
     return beatCount === beatsPerMeasure - 1 ? accentNote : baseNote
   }
 
+  // Update Volume
   function updateVolume(volume: number) {
-    userVolume = volume / 100
+    userVolume = volume
     if (volumeReadingUI) {
-      volumeReadingUI.innerText = Math.round(userVolume * 100).toString()
+      volumeReadingUI.innerText = Math.round(volume * 100).toString()
     }
 
     updateSliders()
-    gain?.gain.rampTo(volume / 100, 0.5)
+    gain?.gain.rampTo(volume, 0.5)
 
-    localStorage.setItem('volume', userVolume.toString())
+    localStorage.setItem('volume', volume.toString())
   }
 
+  // Update BPM
   function updateBpm(bpm: number) {
     if (isPlaying) {
       const newInterval = 60 / bpm
@@ -434,14 +438,15 @@ import mtBox from '../images/metronome-box.svg'
       `${animationDuration}s`,
     )
 
-    updateSliders()
     if (bpmReadingUI) {
       bpmReadingUI.innerText = Math.round(bpm).toString()
     }
 
+    updateSliders()
     localStorage.setItem('bpm', bpm.toString())
   }
 
+  // Iterate Volume
   function iterateVolume(amount: number) {
     if (userVolume && volumeUI && volumeReadingUI) {
       let volume = 0
@@ -453,11 +458,12 @@ import mtBox from '../images/metronome-box.svg'
         return
       }
 
-      updateVolume(volume)
+      updateVolume(volume / 100)
       volumeUI.value = volume.toString()
     }
   }
 
+  // Iterate BPM
   function iterateBpm(amount: number) {
     if (bpm && bpmUI && bpmReadingUI) {
       let newBpm = bpm
@@ -475,8 +481,9 @@ import mtBox from '../images/metronome-box.svg'
     }
   }
 
+  // Update Sliders
   function updateSliders() {
-    sliders.forEach((slider) => {
+    slidersUI?.forEach((slider) => {
       const rangeSlider = slider as HTMLInputElement
       const value = parseInt(rangeSlider.value)
       const minValue = parseInt(rangeSlider.min)
@@ -503,6 +510,7 @@ import mtBox from '../images/metronome-box.svg'
     })
   }
 
+  // Update Labels
   function refreshLabels(activeLabel: HTMLElement) {
     timingLabelsUI.forEach((label) => {
       label.classList.remove('bg-white/80')
